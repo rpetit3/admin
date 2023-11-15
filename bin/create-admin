@@ -1,0 +1,30 @@
+#! /bin/bash
+
+if [[ $# == 0 ]]; then
+    echo ""
+    echo "create-admin NEW_USERNAME"
+    echo ""
+    echo "Example Command"
+    echo "create-admin robert_petit"
+    echo ""
+    exit
+fi
+
+USERNAME=$1
+PASSWORD=$(head /dev/urandom | md5sum | cut -c1-10)
+
+# Add user
+useradd \
+    --shell /bin/bash \
+    --user-group \
+    --groups sudo,docker \
+    --home-dir /home/${USERNAME} \
+    --create-home \
+    --password $(echo ${PASSWORD} | openssl passwd -1 -stdin) \
+    ${USERNAME}
+
+# set password to expire on first login
+chage -d 0 ${USERNAME}
+
+echo "Username: ${USERNAME}"
+echo "One-Time Password: ${PASSWORD}"
